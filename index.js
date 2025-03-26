@@ -20,14 +20,14 @@ const expressServer = app.listen(PORT, () => {
 
 const io = new Server(expressServer, {
   cors: {
-    origin: ["*"],
+    origin: "*",
   },
 });
 
 io.on("connection", (socket) => {
   console.log(`User ${socket.id} connected`);
-});
 
-io.on("disconnect", (socket) => {
-  console.log(`User ${socket.id} disconnected`);
+  socket.on("disconnect", (reason) => {
+    console.log(`User ${socket.id} disconnected`);
+  });
 });
