@@ -14,13 +14,13 @@ const registerShema = z.object({
 })
 
 class AuthController {
-  static async authorization(res, req, next) {
-    const data = res.body;
+  static async authorization(req, res, next) {
+    const data = req.body;
 
     const validated = loginShema.safeParse(data)
 
     if (!validated.success) {
-      res.status(422).json({ message: "Ошибка валидации", errors: validated.error.errors });
+      res.status(422).json({ message: "Ошибка валидации", errors: validated.error.formErrors.fieldErrors });
       return;
     }
 
@@ -46,13 +46,13 @@ class AuthController {
     next();
   }
 
-  static async register(res, req, next) {
-    const data = res.body;
+  static async register(req, res, next) {
+    const data = req.body;
 
     const validated = registerShema.safeParse(data);
 
     if (!validated.success) {
-      res.status(422).json({ message: "Ошибка валидации", errors: validated.error.errors });
+      res.status(422).json({ message: "Ошибка валидации", errors: validated.error.formErrors.fieldErrors });
       return;
     }
     

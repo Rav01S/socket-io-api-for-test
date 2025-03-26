@@ -7,15 +7,15 @@ const createPostValidate = z.object({
 });
 
 class PostController {
-  static async createPost(res, req, next) {
-    const data = res.body;
+  static async createPost(req, res, next) {
+    const data = req.body;
 
     const validated = createPostValidate.safeParse(data);
 
     if (!validated.success) {
       res
         .status(422)
-        .json({ message: "Ошибка валидации", errors: validated.error.errors });
+        .json({ message: "Ошибка валидации", errors: validated.error.formErrors.fieldErrors });
       return;
     }
 
