@@ -26,7 +26,7 @@ class AuthController {
 
     const userExists = await User.query.findFirst({
       where: {
-        email: data.email,
+        email: validated.data.email,
       },
     });
 
@@ -35,7 +35,7 @@ class AuthController {
       return;
     }
 
-    if (!bcrypt.compareSync(data.password, userExists.password)) {
+    if (!bcrypt.compareSync(validated.data.password, userExists.password)) {
       res.status(422).json({ message: "Неверный Email или пароль" });
       return;
     }
@@ -58,16 +58,16 @@ class AuthController {
     
     const userExists = await User.query.findFirst({
       where: {
-        email: data.email,
+        email: validated.data.email,
       },
     });
 
-    if (!userExists) {
+    if (userExists) {
       res.status(422).json({ message: "Пользователь с таким Email уже существует" });
       return;
     }
 
-    const newUser = User.query.create({
+    const newUser = await User.query.create({
       data: {
         ...validated.data,
         password: bcrypt.hashSync(validated.data.password, 10)
