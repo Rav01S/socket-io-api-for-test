@@ -18,7 +18,11 @@ class PostController {
             email: true,
           },
         },
-        responds: true,
+        responds: {
+          select: {
+            userId: true
+          }
+        },
       },
     });
 
@@ -28,7 +32,7 @@ class PostController {
         id: el.id,
         title: el.title,
         author: el.author,
-        isResponded: el.responds.includes(val => val.userId === user.id)
+        isResponded: el.responds.some(item => item.userId === user.id)
       })),
     });
     next();
@@ -53,7 +57,20 @@ class PostController {
         authorId: user.id,
         title: validated.data.title,
       },
+      include: {
+        author: {
+          select: {
+            id: true,
+            email: true,
+            name: true
+          }
+        }
+      }
     });
+
+    const io = req.app.get("io");
+
+    await io.emit("newPost", newPost);
 
     res.status(201).json({ message: `Пост '${newPost.title}' создан` });
     next();

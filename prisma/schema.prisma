@@ -19,8 +19,16 @@ model User {
   email    String @unique
   password String
 
-  posts Post[]
+  tokens        Tokens[]
+  posts         Post[]
   postsResponds PostRespond[]
+}
+
+model Tokens {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  token     String   @unique
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model Post {
@@ -35,8 +43,8 @@ model Post {
 model PostRespond {
   postId Int
   userId Int
-  post Post @relation(references: [id], fields: [postId])
-  user User @relation(references: [id], fields: [userId])
+  post   Post @relation(references: [id], fields: [postId])
+  user   User @relation(references: [id], fields: [userId])
 
   @@id([postId, userId])
 }

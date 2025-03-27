@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import bcrypt from "bcrypt";
 import z from "zod";
+import Token from "../models/Token.js";
 
 // Расширенные схемы валидации
 const loginSchema = z.object({
@@ -56,6 +57,13 @@ class AuthController {
 
       const token = User.jwtSign(userData);
 
+      await Token.query.create({
+        data: {
+          userId: userData.id,
+          token: token,
+        },
+      });
+
       return res.json({
         message: "Успешный вход",
         token: token,
@@ -107,6 +115,13 @@ class AuthController {
 
       const token = User.jwtSign(newUser);
 
+      await Token.query.create({
+        data: {
+          userId: newUser.id,
+          token: token,
+        },
+      });
+
       return res.status(201).json({
         message: "Успешная регистрация",
         token: token,
@@ -118,6 +133,18 @@ class AuthController {
         .status(500)
         .json({ message: "Не удалось создать пользователя" });
     }
+  }
+
+  static async logout(req, res, next) {
+    await Token.query.deleteMany({
+      where: {
+        userId: req.user.id,
+      },
+    });
+
+    req.user = undefined;
+    res.status(200).json({ message: "Success" });
+    next();
   }
 }
 

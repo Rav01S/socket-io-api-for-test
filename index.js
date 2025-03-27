@@ -53,6 +53,7 @@ io.use(async (socket, next) => {
 
 io.on("connection", (socket) => {
   console.log(`User ${socket.id} connected`);
+  socket.join(`user_${socket.user.id}`);
 
   socket.on("disconnect", (reason) => {
     console.log(`User ${socket.id} disconnected`);

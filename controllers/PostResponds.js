@@ -40,7 +40,7 @@ class PostRespondsController {
 
     const io = req.app.get("io");
 
-    io.to(`user_${respond.post.authorId}`).emit("yourPostResponded", {
+    await io.to(`user_${respond.post.authorId}`).emit("yourPostResponded", {
       message: `На ваш пост: ${respond.post.title}, откликнулся ${user.name}`,
     });
 
