@@ -1,4 +1,3 @@
-import bcrypt from "bcrypt";
 import z from "zod";
 import Post from "../models/Post.js";
 
@@ -7,34 +6,56 @@ const createPostValidate = z.object({
 });
 
 class PostController {
+  static async getPosts(req, res, next) {
+    const user = req.user;
+
+    const posts = await Post.query.findMany({
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        responds: true,
+      },
+    });
+
+    res.json({
+      message: "Посты получены",
+      posts: posts.map((el) => ({
+        id: el.id,
+        title: el.title,
+        author: el.author,
+        isResponded: el.responds.includes(val => val.userId === user.id)
+      })),
+    });
+    next();
+  }
+
   static async createPost(req, res, next) {
     const data = req.body;
+    const user = req.user;
 
     const validated = createPostValidate.safeParse(data);
 
     if (!validated.success) {
-      res
-        .status(422)
-        .json({ message: "Ошибка валидации", errors: validated.error.formErrors.fieldErrors });
+      res.status(422).json({
+        message: "Ошибка валидации",
+        errors: validated.error.formErrors.fieldErrors,
+      });
       return;
     }
-
-    const authorJson = req.cookies.user;
-    if (!authorJson) {
-      res.status(401).json({ message: "Не авторизован" });
-      return;
-    }
-
-    const authorId = JSON.parse(authorJson.id);
 
     const newPost = await Post.query.create({
       data: {
-        authorId: authorId,
+        authorId: user.id,
         title: validated.data.title,
       },
     });
 
-    res.status(201).json({ message: `Пост "${newPost.title}" создан` });
+    res.status(201).json({ message: `Пост '${newPost.title}' создан` });
     next();
   }
 }
