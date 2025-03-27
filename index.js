@@ -5,17 +5,23 @@ import PostController from "./controllers/PostController.js";
 import PostRespondsController from "./controllers/PostResponds.js";
 import { authenticateToken } from "./middlewares/AuthToken.js";
 import jwt from "jsonwebtoken";
+import cors from "cors";
 
 const PORT = 3500;
 
 const app = express();
 
 app.use(express.json());
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 
 app.post("/login", AuthController.authorization);
 app.post("/register", AuthController.register);
 
-app.post("/posts", authenticateToken, PostController.getPosts);
+app.get("/posts", authenticateToken, PostController.getPosts);
 app.post("/posts", authenticateToken, PostController.createPost);
 app.post(
   "/posts/:id",
@@ -32,6 +38,7 @@ const io = new Server(expressServer, {
     origin: "*",
   },
 });
+
 
 io.use(async (socket, next) => {
   try {
@@ -52,4 +59,4 @@ io.on("connection", (socket) => {
   });
 });
 
-app.set('io', io)
+app.set("io", io);
