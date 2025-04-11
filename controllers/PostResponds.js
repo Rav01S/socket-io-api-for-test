@@ -1,5 +1,6 @@
 import { z } from "zod";
 import PostRespond from "../models/PostRespond.js";
+import { sendToUser } from "../index.js";
 
 class PostRespondsController {
   static async createPostRespond(req, res, next) {
@@ -38,10 +39,8 @@ class PostRespondsController {
       },
     });
 
-    const io = req.app.get("io");
-
-    await io.to(`user_${respond.post.authorId}`).emit("yourPostResponded", {
-      message: `На ваш пост: ${respond.post.title}, откликнулся ${user.name}`,
+    sendToUser(respond.post.authorId, "yourPostResponded", {
+      message: `На ваш пост: ${respond.post.title}, откликнулся ${user.name}`
     });
 
     res.status(201).json({ message: "Вы откликнулись на объявление" });

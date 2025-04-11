@@ -1,5 +1,6 @@
 import z from "zod";
 import Post from "../models/Post.js";
+import { broadcastToAll } from "../index.js";
 
 const createPostValidate = z.object({
   title: z.string().min(3),
@@ -20,8 +21,8 @@ class PostController {
         },
         responds: {
           select: {
-            userId: true
-          }
+            userId: true,
+          },
         },
       },
     });
@@ -32,7 +33,7 @@ class PostController {
         id: el.id,
         title: el.title,
         author: el.author,
-        isResponded: el.responds.some(item => item.userId === user.id)
+        isResponded: el.responds.some((item) => item.userId === user.id),
       })),
     });
     next();
@@ -62,15 +63,13 @@ class PostController {
           select: {
             id: true,
             email: true,
-            name: true
-          }
-        }
-      }
+            name: true,
+          },
+        },
+      },
     });
 
-    const io = req.app.get("io");
-
-    await io.emit("newPost", newPost);
+    broadcastToAll("newPost", newPost);
 
     res.status(201).json({ message: `Пост '${newPost.title}' создан` });
     next();
